@@ -1,0 +1,90 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+
+{% if is_customer %}
+<form method="GET" style="margin-bottom:20px;">
+    <input type="text" name="q" placeholder="Search by menu title..."
+           value="{{ query|default:'' }}">
+    <button type="submit">Search</button>
+</form>
+{% endif %}
+
+<h2>Available Menus</h2>
+
+{% for menu in menus %}
+<div class="menu-card" style="border:1px solid #ccc; padding:15px; margin-bottom:20px;">
+
+    {% if is_owner %}
+        <a href="{% url 'add_daily_menu' menu.id %}">
+            <button>Add Weekly Food</button>
+        </a>
+    {% endif %}
+
+    {% if menu.image %}
+        <img src="{{ menu.image.url }}" width="200">
+    {% endif %}
+
+    <h3>{{ menu.title }}</h3>
+    <p>{{ menu.description }}</p>
+    <p><strong>₹{{ menu.monthly_price }}/month</strong></p>
+
+    <!-- OWNER CONTROLS -->
+    {% if user.is_authenticated and user.is_staff and menu.tiffin_service.owner == user %}
+        <a href="{% url 'edit_menu' menu.id %}"><button>Edit</button></a>
+        <a href="{% url 'delete_menu' menu.id %}"
+           onclick="return confirm('Are you sure?');">
+           <button>Delete</button>
+        </a>
+        <a href="{% url 'add_subscription' menu.id %}">
+            <button>Add Subscription</button>
+        </a>
+    {% endif %}
+
+    <!-- WEEKLY MENU -->
+    <hr>
+    <h4>Weekly Menu</h4>
+
+    {% for day_menu in menu.daily_menus.all %}
+        <div style="margin-bottom:10px;">
+            <strong>{{ day_menu.day }}</strong>
+            <p>{{ day_menu.food_description }}</p>
+
+            {% if day_menu.image %}
+                <img src="{{ day_menu.image.url }}" width="150">
+            {% endif %}
+        </div>
+    {% empty %}
+        <p>No weekly food added.</p>
+    {% endfor %}
+
+    <!-- SUBSCRIPTIONS -->
+    <hr>
+    <h4>Subscriptions</h4>
+
+    {% for sub in menu.subscriptions.all %}
+        <div style="border:1px solid #eee; padding:10px; margin-bottom:10px;">
+            <p><strong>{{ sub.title }}</strong></p>
+            <p>{{ sub.duration_in_days }} days</p>
+            <p>₹{{ sub.price }}</p>
+
+            {% if user.is_authenticated and not user.is_staff %}
+                {% if not sub.is_subscribed %}
+                    <a href="{% url 'subscribe' sub.id %}">
+                        <button>Subscribe</button>
+                    </a>
+                {% else %}
+                    <button disabled>Subscribed</button>
+                {% endif %}
+            {% endif %}
+        </div>
+    {% empty %}
+        <p>No subscriptions available.</p>
+    {% endfor %}
+
+</div>
+{% empty %}
+    <p>No menus available.</p>
+{% endfor %}
+
+{% endblock %}

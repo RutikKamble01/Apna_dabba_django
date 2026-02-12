@@ -1,0 +1,20 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<h2>Add Subscription for {{ menu.title }}</h2>
+
+<form method="post">
+    {% csrf_token %}
+
+    <input type="text" name="title" placeholder="Subscription Name" required><br><br>
+
+    <input type="number" name="duration" placeholder="Duration (Days)" required><br><br>
+
+    <input type="number" name="price" placeholder="Price" required><br><br>
+
+    <textarea name="description" placeholder="Description"></textarea><br><br>
+
+    <button type="submit">Add Subscription</button>
+</form>
+
+{% endblock %}

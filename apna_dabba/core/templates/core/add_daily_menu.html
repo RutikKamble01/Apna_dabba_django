@@ -1,0 +1,27 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<h2>Add Daily Food for {{ menu.title }}</h2>
+
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+
+    <label>Select Day:</label>
+    <select name="day" required>
+        <option value="Monday">Monday</option>
+        <option value="Tuesday">Tuesday</option>
+        <option value="Wednesday">Wednesday</option>
+        <option value="Thursday">Thursday</option>
+        <option value="Friday">Friday</option>
+        <option value="Saturday">Saturday</option>
+        <option value="Sunday">Sunday</option>
+    </select><br><br>
+
+<textarea name="food_description" placeholder="Food details" required></textarea>
+
+    <input type="file" name="image"><br><br>
+
+    <button type="submit">Add</button>
+</form>
+
+{% endblock %}

@@ -1,0 +1,81 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+
+<h2>Welcome to Apna Dabba</h2>
+
+{% if user.is_authenticated %}
+
+    <div style="background:#f5f5f5; padding:10px; margin-bottom:20px;">
+        👤 <strong>{{ user.username }}</strong> is logged in
+    </div>
+
+    {% if user.is_staff %}
+
+        <!-- OWNER DASHBOARD SECTION -->
+        <h3>Owner Dashboard</h3>
+
+        <a href="{% url 'add_menu' %}">
+            <button>Add New Menu</button>
+        </a>
+
+        <hr>
+
+        {% for menu in owner_menus %}
+                <div style="border:1px solid #ccc; padding:15px; margin-bottom:15px;">
+
+        <h4>{{ menu.title }}</h4>
+
+        <a href="{% url 'edit_menu' menu.id %}">
+            <button>Edit</button>
+        </a>
+
+        <a href="{% url 'delete_menu' menu.id %}">
+            <button>Delete</button>
+        </a>
+
+        <!-- 🔥 THIS IS THE MISSING BUTTON -->
+        <a href="{% url 'add_daily_menu' menu.id %}">
+            <button>Add Weekly Food</button>
+        </a>
+
+        <a href="{% url 'add_subscription' menu.id %}">
+            <button>Add Subscription Plan</button>
+        </a>
+
+    </div>
+        {% empty %}
+            <p>No menus added yet.</p>
+        {% endfor %}
+
+    {% else %}
+
+        <!-- CUSTOMER DASHBOARD SECTION -->
+        <h3>Customer Dashboard</h3>
+
+        <a href="{% url 'menu' %}">
+            <button>Browse Menus</button>
+        </a>
+
+        <hr>
+
+        <h4>Your Active Subscriptions</h4>
+
+        {% for sub in active_subscriptions %}
+            <div style="border:1px solid #ccc; padding:10px; margin-bottom:10px;">
+                <strong>{{ sub.menu.title }}</strong><br>
+                Ends on: {{ sub.end_date }}
+            </div>
+        {% empty %}
+            <p>No active subscriptions.</p>
+        {% endfor %}
+
+    {% endif %}
+
+{% else %}
+
+    <p>Please login or register to continue.</p>
+
+{% endif %}
+
+{% endblock %}

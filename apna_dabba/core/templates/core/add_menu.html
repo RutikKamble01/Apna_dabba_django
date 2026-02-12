@@ -1,0 +1,31 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<h2>Add Menu</h2>
+
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+
+    <input type="text" name="title" placeholder="Menu Title" required><br><br>
+
+    <textarea name="description" placeholder="Menu Description" required></textarea><br><br>
+
+    <input type="number" name="price" placeholder="Monthly Price" required><br><br>
+
+     <h3>Day-wise Menu</h3>
+
+<textarea name="monday" placeholder="Monday Menu"></textarea><br><br>
+<textarea name="tuesday" placeholder="Tuesday Menu"></textarea><br><br>
+<textarea name="wednesday" placeholder="Wednesday Menu"></textarea><br><br>
+<textarea name="thursday" placeholder="Thursday Menu"></textarea><br><br>
+<textarea name="friday" placeholder="Friday Menu"></textarea><br><br>
+<textarea name="saturday" placeholder="Saturday Menu"></textarea><br><br>
+<textarea name="sunday" placeholder="Sunday Menu"></textarea><br><br> 
+
+
+    <input type="file" name="image" required><br><br>
+
+    <button type="submit">Add Menu</button>
+</form>
+
+{% endblock %}

@@ -1,0 +1,72 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Customer Dashboard{% endblock %}
+
+{% block content %}
+
+<h2>👤 Customer Dashboard</h2>
+
+<p>Welcome, <strong>{{ request.user.username }}</strong></p>
+
+<hr>
+<h3>Your Active Subscriptions</h3>
+
+{% for sub in active_subscriptions %}
+    <div style="border:1px solid #ccc; padding:10px; margin-bottom:10px;">
+        <strong>Menu:</strong> {{ sub.menu.title }}<br>
+        <strong>Ends On:</strong> {{ sub.end_date }}
+    </div>
+{% empty %}
+    <p>You have no active subscriptions.</p>
+{% endfor %}
+
+
+<hr>
+
+<div style="margin-bottom:20px;">
+    <a href="{% url 'menu' %}">
+        <button>Browse All Menus</button>
+    </a>
+
+    <a href="{% url 'order' %}">
+        <button>My Orders</button>
+    </a>
+
+    <a href="{% url 'reviews' %}">
+        <button>My Reviews</button>
+    </a>
+</div>
+
+<hr>
+
+<h3>Available Menus</h3>
+
+{% if menus %}
+    {% for menu in menus %}
+        <div style="border:1px solid #ccc; padding:15px; margin-bottom:15px;">
+
+            {% if menu.image %}
+                <img src="{{ menu.image.url }}" width="150">
+            {% endif %}
+
+            <h4>{{ menu.title }}</h4>
+            <p>{{ menu.description }}</p>
+            <p><strong>₹{{ menu.monthly_price }}/month</strong></p>
+
+            <a href="{% url 'menu' %}">
+                <button>View Details</button>
+            </a>
+
+        </div>
+    {% endfor %}
+{% else %}
+    <p>No menus available at the moment.</p>
+{% endif %}
+
+<hr>
+
+<a href="{% url 'logout' %}">
+    <button>Logout</button>
+</a>
+
+{% endblock %}

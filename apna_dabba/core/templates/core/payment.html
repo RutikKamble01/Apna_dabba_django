@@ -1,0 +1,22 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<h2>Payment for {{ subscription.menu.title }}</h2>
+<p>Amount: ₹{{ subscription.price }}</p>
+
+<form method="POST">
+    {% csrf_token %}
+
+    <label>Card Number:</label><br>
+    <input type="text" name="card_number" required><br><br>
+
+    <label>Expiry Date:</label><br>
+    <input type="text" name="expiry" placeholder="MM/YY" required><br><br>
+
+    <label>CVV:</label><br>
+    <input type="password" name="cvv" required><br><br>
+
+    <button type="submit">Pay & Subscribe</button>
+</form>
+
+{% endblock %}

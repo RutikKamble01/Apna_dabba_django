@@ -1,0 +1,21 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<h2>Select Menu to Add Subscription</h2>
+
+{% if menus %}
+    <ul>
+        {% for menu in menus %}
+            <li>
+                {{ menu.title }}
+                <a href="{% url 'add_subscription' menu.id %}">
+                    Add Subscription
+                </a>
+            </li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <p>You have no menus yet.</p>
+{% endif %}
+
+{% endblock %}

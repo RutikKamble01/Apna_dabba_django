@@ -1,0 +1,85 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Owner Dashboard{% endblock %}
+
+{% block content %}
+<h1 style="color:red;">THIS IS OWNER DASHBOARD TEMPLATE</h1>
+
+
+<h2>🏠 Owner Dashboard</h2>
+
+<p>Welcome, <strong>{{ request.user.username }}</strong></p>
+
+<hr>
+
+<!-- QUICK ACTIONS -->
+<a href="{% url 'add_menu' %}">
+    
+</a>
+
+<a href="{% url 'select_menu_for_subscription' %}">
+    <button>Add Subscription</button>
+</a>
+
+<hr>
+
+<h3>Active Subscriptions</h3>
+
+{% for sub in subscriptions %}
+    <div style="border:1px solid #ccc; padding:10px; margin-bottom:10px;">
+        <strong>Customer:</strong> {{ sub.customer.username }}<br>
+        <strong>Menu:</strong> {{ sub.menu.title }}<br>
+        <strong>Plan:</strong> {{ sub.subscription.title }}<br>
+        <strong>End Date:</strong> {{ sub.end_date }}
+    </div>
+{% empty %}
+    <p>No active subscriptions.</p>
+{% endfor %}
+
+<hr>
+
+<h3>Your Menus</h3>
+
+{% if menus %}
+    {% for menu in menus %}
+        <div style="border:1px solid #ccc; padding:15px; margin-bottom:15px;">
+
+            {% if menu.image %}
+                <img src="{{ menu.image.url }}" width="150">
+            {% endif %}
+
+            <h4>{{ menu.title }}</h4>
+            <p>{{ menu.description }}</p>
+            <p><strong>₹{{ menu.monthly_price }}/month</strong></p>
+
+            <!-- MENU CONTROLS -->
+            <a href="{% url 'edit_menu' menu.id %}">
+                <button>Edit</button>
+            </a>
+
+            <a href="{% url 'delete_menu' menu.id %}"
+               onclick="return confirm('Are you sure?');">
+                <button>Delete</button>
+            </a>
+
+            <a href="{% url 'add_daily_menu' menu.id %}">
+                <button>Add Weekly Food</button>
+            </a>
+
+            <a href="{% url 'add_subscription' menu.id %}">
+                <button>Add Subscription Plan</button>
+            </a>
+
+        </div>
+    {% endfor %}
+{% else %}
+    <p>You have not added any menus yet.</p>
+{% endif %}
+
+<hr>
+
+<a href="{% url 'logout' %}">
+    <button>Logout</button>
+</a>
+
+{% endblock %}

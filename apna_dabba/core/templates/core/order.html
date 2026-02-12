@@ -1,0 +1,20 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Order{% endblock %}
+
+{% block content %}
+<h2>Confirm Subscription</h2>
+
+<form method="post">
+    {% csrf_token %}
+    <label>Select Plan:</label><br>
+    <select>
+        <option>Monthly Plan</option>
+    </select><br><br>
+
+    <label>Delivery Address:</label><br>
+    <textarea rows="3"></textarea><br><br>
+
+    <button type="submit">Place Order</button>
+</form>
+{% endblock %}

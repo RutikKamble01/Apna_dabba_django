@@ -1,0 +1,31 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<h2>Edit Menu</h2>
+
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+
+    <input type="text" name="title" value="{{ menu.title }}" required><br><br>
+
+    <textarea name="description" required>{{ menu.description }}</textarea><br><br>
+
+    <input type="number" name="price" value="{{ menu.monthly_price }}" required><br><br>
+
+    <h3>Day-wise Menu</h3>
+
+<textarea name="monday">{{ menu.monday }}</textarea><br><br>
+<textarea name="tuesday">{{ menu.tuesday }}</textarea><br><br>
+<textarea name="wednesday">{{ menu.wednesday }}</textarea><br><br>
+<textarea name="thursday">{{ menu.thursday }}</textarea><br><br>
+<textarea name="friday">{{ menu.friday }}</textarea><br><br>
+<textarea name="saturday">{{ menu.saturday }}</textarea><br><br>
+<textarea name="sunday">{{ menu.sunday }}</textarea><br><br>
+
+
+    <input type="file" name="image"><br><br>
+
+    <button type="submit">Update Menu</button>
+</form>
+
+{% endblock %}
