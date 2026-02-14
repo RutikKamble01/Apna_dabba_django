@@ -1,24 +1,74 @@
-
 {% extends 'core/base.html' %}
+{% block title %}Login{% endblock %}
 
 {% block content %}
-<h2>Login</h2>
-<p>Login for Customers & Tiffin Owners</p>
 
-{% if error %}
-<p style="color:red;">{{ error }}</p>
-{% endif %}
+<div class="auth-container">
+    <div class="auth-card">
 
-<form method="post">
-    {% csrf_token %}
-    <input type="text" name="username" placeholder="Username" required>
-    <input type="password" name="password" placeholder="Password" required>
+        <h1 class="logo">🍱 Apna <span>Dabba</span></h1>
+        <p class="subtitle">Sign in to continue</p>
 
-    <button type="submit">Login</button>
-</form>
+        <!-- Role Switch -->
+        <div class="role-switch">
+            <div id="slider"></div>
+            <button id="customerBtn" class="active"
+                    onclick="setRole('customer')">Customer</button>
+            <button id="ownerBtn"
+                    onclick="setRole('owner')">Owner</button>
+        </div>
 
-<p>
-    New Customer? <a href="{% url 'register' %}">Register</a><br>
-    Tiffin Owner? <a href="{% url 'owner_register' %}">Register as Owner</a>
-</p>
+        {% if error %}
+        <div class="error">{{ error }}</div>
+        {% endif %}
+
+        <form method="post">
+            {% csrf_token %}
+            <input type="hidden" name="role" id="roleInput" value="customer">
+
+            <div class="input-group">
+                <input type="text" name="username" required placeholder=" ">
+                <label>Email / Username</label>
+            </div>
+
+            <div class="input-group">
+                <input type="password" name="password" required placeholder=" ">
+                <label>Password</label>
+            </div>
+
+            <button type="submit" class="login-btn">Sign In</button>
+        </form>
+
+        <p class="signup">
+            Don't have an account?
+            <a href="{% url 'register' %}" id="signupLink">Sign up</a>
+        </p>
+
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function setRole(role) {
+    document.getElementById("roleInput").value = role;
+
+    const slider = document.getElementById("slider");
+    const customerBtn = document.getElementById("customerBtn");
+    const ownerBtn = document.getElementById("ownerBtn");
+
+    if (role === "customer") {
+        slider.style.left = "0%";
+        customerBtn.classList.add("active");
+        ownerBtn.classList.remove("active");
+        document.getElementById("signupLink").href = "{% url 'register' %}";
+    } else {
+        slider.style.left = "50%";
+        ownerBtn.classList.add("active");
+        customerBtn.classList.remove("active");
+        document.getElementById("signupLink").href = "{% url 'owner_register' %}";
+    }
+}
+</script>
 {% endblock %}

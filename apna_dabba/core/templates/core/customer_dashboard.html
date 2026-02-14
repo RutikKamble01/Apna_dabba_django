@@ -4,69 +4,119 @@
 
 {% block content %}
 
-<h2>👤 Customer Dashboard</h2>
-
-<p>Welcome, <strong>{{ request.user.username }}</strong></p>
-
-<hr>
-<h3>Your Active Subscriptions</h3>
-
-{% for sub in active_subscriptions %}
-    <div style="border:1px solid #ccc; padding:10px; margin-bottom:10px;">
-        <strong>Menu:</strong> {{ sub.menu.title }}<br>
-        <strong>Ends On:</strong> {{ sub.end_date }}
-    </div>
-{% empty %}
-    <p>You have no active subscriptions.</p>
-{% endfor %}
-
-
-<hr>
-
-<div style="margin-bottom:20px;">
-    <a href="{% url 'menu' %}">
-        <button>Browse All Menus</button>
-    </a>
-
-    <a href="{% url 'order' %}">
-        <button>My Orders</button>
-    </a>
-
-    <a href="{% url 'reviews' %}">
-        <button>My Reviews</button>
-    </a>
+<div class="dashboard-header">
+    <h2>👤 Customer Dashboard</h2>
+    <p>Welcome back, <strong>{{ request.user.username }}</strong>!</p>
 </div>
 
-<hr>
+<div class="stats-grid">
+    <div class="stat-card">
+        <h3>Active Subscriptions</h3>
+        <div class="stat-value">{{ active_subscriptions|length }}</div>
+    </div>
+    {% if primary_subscription %}
+    <div class="stat-card">
+        <h3>Days Remaining</h3>
+        <div class="stat-value">{{ days_remaining }}</div>
+        <p style="font-size: 0.85rem; color: #666; margin-top: 0.5rem;">{{ primary_subscription.status }}</p>
+    </div>
+    {% endif %}
+    <div class="stat-card">
+        <h3>Total Subscriptions</h3>
+        <div class="stat-value">{{ total_subscriptions }}</div>
+    </div>
+</div>
 
-<h3>Available Menus</h3>
-
-{% if menus %}
-    {% for menu in menus %}
-        <div style="border:1px solid #ccc; padding:15px; margin-bottom:15px;">
-
-            {% if menu.image %}
-                <img src="{{ menu.image.url }}" width="150">
-            {% endif %}
-
-            <h4>{{ menu.title }}</h4>
-            <p>{{ menu.description }}</p>
-            <p><strong>₹{{ menu.monthly_price }}/month</strong></p>
-
-            <a href="{% url 'menu' %}">
-                <button>View Details</button>
-            </a>
-
+<div class="card mb-3">
+    <div class="card-header">
+        <h3 class="card-title">Quick Actions</h3>
+    </div>
+    <div class="card-body">
+        <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+            <a href="{% url 'menu' %}" class="btn">Browse All Menus</a>
+            <a href="{% url 'order' %}" class="btn btn-secondary">My Orders</a>
+            <a href="{% url 'reviews' %}" class="btn btn-secondary">My Reviews</a>
         </div>
-    {% endfor %}
-{% else %}
-    <p>No menus available at the moment.</p>
+    </div>
+</div>
+
+<div class="card mb-3">
+    <h3 class="card-title mb-3">Your Active Subscriptions</h3>
+    {% if active_subscriptions %}
+        {% for sub in active_subscriptions %}
+            <div class="subscription-card">
+                <div class="flex-between">
+                    <div>
+                        <strong>{{ sub.menu.title }}</strong>
+                        <p style="color: #666; margin-top: 0.5rem;">
+                            <strong>Plan:</strong> {{ sub.subscription.title }} (₹{{ sub.subscription.price }})<br>
+                            <strong>Ends On:</strong> {{ sub.end_date|date:"M d, Y" }}<br>
+                            <span class="status-badge status-{{ sub.status|lower }}">{{ sub.status }}</span>
+                            {% if sub.days_remaining > 0 %}
+                                <span style="color: #666;">• {{ sub.days_remaining }} days remaining</span>
+                            {% endif %}
+                        </p>
+                    </div>
+                    <a href="{% url 'menu' %}" class="btn">View Details</a>
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <div class="empty-state">
+            <div class="empty-state-icon">📦</div>
+            <h3>No active subscriptions</h3>
+            <p>Browse our menus and start your subscription today!</p>
+            <a href="{% url 'menu' %}" class="btn mt-3">Browse Menus</a>
+        </div>
+    {% endif %}
+</div>
+
+{% if grid_data %}
+<div class="card mb-3">
+    <h3 class="card-title mb-3">Tiffin Contribution Calendar</h3>
+    <div class="calendar">
+        {% for day in grid_data %}
+            <div class="calendar-square {% if day.taken %}green{% else %}empty{% endif %}"
+                 title="{{ day.date }}">
+            </div>
+        {% endfor %}
+    </div>
+    <p style="margin-top: 1rem; color: #666; font-size: 0.9rem;">
+        <span style="display: inline-block; width: 12px; height: 12px; background: #4caf50; border-radius: 3px; margin-right: 0.5rem;"></span>
+        Green = Meal taken
+        <span style="display: inline-block; width: 12px; height: 12px; background: #e0e0e0; border-radius: 3px; margin-left: 1rem; margin-right: 0.5rem;"></span>
+        Gray = No meal
+    </p>
+</div>
 {% endif %}
 
-<hr>
-
-<a href="{% url 'logout' %}">
-    <button>Logout</button>
-</a>
+<div class="card">
+    <h3 class="card-title mb-3">Available Menus</h3>
+    {% if menus %}
+        <div class="menu-grid">
+            {% for menu in menus %}
+                <div class="menu-card">
+                    {% if menu.image %}
+                        <img src="{{ menu.image.url }}" alt="{{ menu.title }}" class="menu-card-image">
+                    {% else %}
+                        <div class="menu-card-image"></div>
+                    {% endif %}
+                    <div class="menu-card-body">
+                        <h4 class="menu-card-title">{{ menu.title }}</h4>
+                        <p class="menu-card-description">{{ menu.description|truncatewords:20 }}</p>
+                        <p class="menu-card-price">₹{{ menu.monthly_price }}/month</p>
+                        <a href="{% url 'menu' %}" class="btn" style="width: 100%; text-align: center;">View Details</a>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="empty-state">
+            <div class="empty-state-icon">🍽️</div>
+            <h3>No menus available</h3>
+            <p>Check back later for new menu options!</p>
+        </div>
+    {% endif %}
+</div>
 
 {% endblock %}

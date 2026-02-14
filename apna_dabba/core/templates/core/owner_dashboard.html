@@ -3,83 +3,106 @@
 {% block title %}Owner Dashboard{% endblock %}
 
 {% block content %}
-<h1 style="color:red;">THIS IS OWNER DASHBOARD TEMPLATE</h1>
 
+<div class="dashboard-header">
+    <h2>🏠 Owner Dashboard</h2>
+    <p>Welcome back, <strong>{{ request.user.username }}</strong>!</p>
+</div>
 
-<h2>🏠 Owner Dashboard</h2>
-
-<p>Welcome, <strong>{{ request.user.username }}</strong></p>
-
-<hr>
-
-<!-- QUICK ACTIONS -->
-<a href="{% url 'add_menu' %}">
-    
-</a>
-
-<a href="{% url 'select_menu_for_subscription' %}">
-    <button>Add Subscription</button>
-</a>
-
-<hr>
-
-<h3>Active Subscriptions</h3>
-
-{% for sub in subscriptions %}
-    <div style="border:1px solid #ccc; padding:10px; margin-bottom:10px;">
-        <strong>Customer:</strong> {{ sub.customer.username }}<br>
-        <strong>Menu:</strong> {{ sub.menu.title }}<br>
-        <strong>Plan:</strong> {{ sub.subscription.title }}<br>
-        <strong>End Date:</strong> {{ sub.end_date }}
+<div class="stats-grid">
+    <div class="stat-card">
+        <h3>Total Revenue</h3>
+        <div class="stat-value">₹{{ revenue_stats.total_revenue|floatformat:2 }}</div>
+        <p style="font-size: 0.85rem; color: #666; margin-top: 0.5rem;">All active subscriptions</p>
     </div>
-{% empty %}
-    <p>No active subscriptions.</p>
-{% endfor %}
+    <div class="stat-card">
+        <h3>Monthly Revenue</h3>
+        <div class="stat-value">₹{{ revenue_stats.monthly_revenue|floatformat:2 }}</div>
+        <p style="font-size: 0.85rem; color: #666; margin-top: 0.5rem;">This month</p>
+    </div>
+    <div class="stat-card">
+        <h3>Active Subscribers</h3>
+        <div class="stat-value">{{ revenue_stats.active_subscribers }}</div>
+        <p style="font-size: 0.85rem; color: #666; margin-top: 0.5rem;">Unique customers</p>
+    </div>
+    <div class="stat-card">
+        <h3>Total Menus</h3>
+        <div class="stat-value">{{ revenue_stats.total_menus }}</div>
+        <p style="font-size: 0.85rem; color: #666; margin-top: 0.5rem;">Your menus</p>
+    </div>
+</div>
 
-<hr>
+<div class="card mb-3">
+    <div class="card-header">
+        <h3 class="card-title">Quick Actions</h3>
+    </div>
+    <div class="card-body">
+        <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+            <a href="{% url 'add_menu' %}" class="btn">+ Add New Menu</a>
+            <a href="{% url 'select_menu_for_subscription' %}" class="btn btn-success">Add Subscription</a>
+        </div>
+    </div>
+</div>
 
-<h3>Your Menus</h3>
-
-{% if menus %}
-    {% for menu in menus %}
-        <div style="border:1px solid #ccc; padding:15px; margin-bottom:15px;">
-
-            {% if menu.image %}
-                <img src="{{ menu.image.url }}" width="150">
-            {% endif %}
-
-            <h4>{{ menu.title }}</h4>
-            <p>{{ menu.description }}</p>
-            <p><strong>₹{{ menu.monthly_price }}/month</strong></p>
-
-            <!-- MENU CONTROLS -->
-            <a href="{% url 'edit_menu' menu.id %}">
-                <button>Edit</button>
-            </a>
-
-            <a href="{% url 'delete_menu' menu.id %}"
-               onclick="return confirm('Are you sure?');">
-                <button>Delete</button>
-            </a>
-
-            <a href="{% url 'add_daily_menu' menu.id %}">
-                <button>Add Weekly Food</button>
-            </a>
-
-            <a href="{% url 'add_subscription' menu.id %}">
-                <button>Add Subscription Plan</button>
-            </a>
-
+{% if subscriptions %}
+<div class="card mb-3">
+    <h3 class="card-title mb-3">Active Subscriptions</h3>
+    {% for sub in subscriptions %}
+        <div class="subscription-card">
+            <div class="flex-between">
+                <div>
+                    <strong>Customer:</strong> {{ sub.customer.username }}<br>
+                    <strong>Menu:</strong> {{ sub.menu.title }}<br>
+                    <strong>Plan:</strong> {{ sub.subscription.title }} (₹{{ sub.subscription.price }})<br>
+                    <strong>End Date:</strong> {{ sub.end_date|date:"M d, Y" }}<br>
+                    <span class="status-badge status-{{ sub.status|lower }}">{{ sub.status }}</span>
+                    {% if sub.days_remaining > 0 %}
+                        <span style="color: #666; font-size: 0.9rem;">• {{ sub.days_remaining }} days remaining</span>
+                    {% endif %}
+                </div>
+                <a href="{% url 'toggle_meal' sub.id %}" class="btn btn-success">Mark Today</a>
+            </div>
         </div>
     {% endfor %}
-{% else %}
-    <p>You have not added any menus yet.</p>
+</div>
 {% endif %}
 
-<hr>
-
-<a href="{% url 'logout' %}">
-    <button>Logout</button>
-</a>
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title">Your Menus</h3>
+        <a href="{% url 'add_menu' %}" class="btn">+ Add Menu</a>
+    </div>
+    {% if menus %}
+        <div class="menu-grid">
+            {% for menu in menus %}
+                <div class="menu-card">
+                    {% if menu.image %}
+                        <img src="{{ menu.image.url }}" alt="{{ menu.title }}" class="menu-card-image">
+                    {% else %}
+                        <div class="menu-card-image"></div>
+                    {% endif %}
+                    <div class="menu-card-body">
+                        <h4 class="menu-card-title">{{ menu.title }}</h4>
+                        <p class="menu-card-description">{{ menu.description|truncatewords:15 }}</p>
+                        <p class="menu-card-price">₹{{ menu.monthly_price }}/month</p>
+                        <div class="menu-card-actions">
+                            <a href="{% url 'edit_menu' menu.id %}" class="btn btn-secondary">Edit</a>
+                            <a href="{% url 'delete_menu' menu.id %}" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this menu?');">Delete</a>
+                            <a href="{% url 'add_daily_menu' menu.id %}" class="btn">Weekly Food</a>
+                            <a href="{% url 'add_subscription' menu.id %}" class="btn btn-success">Subscription</a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="empty-state">
+            <div class="empty-state-icon">📋</div>
+            <h3>No menus added yet</h3>
+            <p>Start by adding your first menu to get started!</p>
+            <a href="{% url 'add_menu' %}" class="btn mt-3">Add New Menu</a>
+        </div>
+    {% endif %}
+</div>
 
 {% endblock %}

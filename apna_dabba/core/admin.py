@@ -1,5 +1,10 @@
 from django.contrib import admin
 from .models import TiffinService, Menu, Order, Review
+from .models import Menu
+
+# admin.site.register(Menu)
+from .models import Subscription
+admin.site.register(Subscription)
 
 
 @admin.register(TiffinService)

@@ -2,79 +2,139 @@
 
 {% block content %}
 
-<h2>Welcome to Apna Dabba</h2>
+<div class="dashboard-header">
+    <h2>Welcome to Apna Dabba 🍱</h2>
+    <p>Your trusted partner for delicious homemade meals</p>
+</div>
 
 {% if user.is_authenticated %}
 
-    <div style="background:#f5f5f5; padding:10px; margin-bottom:20px;">
-        👤 <strong>{{ user.username }}</strong> is logged in
+    <div class="card mb-3">
+        <div class="flex-between">
+            <div>
+                <strong>👤 {{ user.username }}</strong>
+                <span style="color: #666; margin-left: 1rem;">is logged in</span>
+            </div>
+            {% if user.is_staff %}
+                <a href="{% url 'owner_dashboard' %}" class="btn">Go to Dashboard →</a>
+            {% else %}
+                <a href="{% url 'customer_dashboard' %}" class="btn">Go to Dashboard →</a>
+            {% endif %}
+        </div>
     </div>
 
     {% if user.is_staff %}
 
         <!-- OWNER DASHBOARD SECTION -->
-        <h3>Owner Dashboard</h3>
+        <div class="card mb-3">
+            <div class="card-header">
+                <h3 class="card-title">Owner Dashboard</h3>
+                <a href="{% url 'add_menu' %}" class="btn">+ Add New Menu</a>
+            </div>
+        </div>
 
-        <a href="{% url 'add_menu' %}">
-            <button>Add New Menu</button>
-        </a>
+        {% if active_subscriptions %}
+        <div class="card mb-3">
+            <h3 class="card-title mb-3">Active Subscriptions</h3>
+            {% for sub in active_subscriptions %}
+                <div class="subscription-card">
+                    <div class="flex-between">
+                        <div>
+                            <strong>{{ sub.customer.username }}</strong> - {{ sub.menu.title }}
+                        </div>
+                        <a href="{% url 'toggle_meal' sub.id %}" class="btn btn-success">Mark Today</a>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+        {% endif %}
 
-        <hr>
-
-        {% for menu in owner_menus %}
-                <div style="border:1px solid #ccc; padding:15px; margin-bottom:15px;">
-
-        <h4>{{ menu.title }}</h4>
-
-        <a href="{% url 'edit_menu' menu.id %}">
-            <button>Edit</button>
-        </a>
-
-        <a href="{% url 'delete_menu' menu.id %}">
-            <button>Delete</button>
-        </a>
-
-        <!-- 🔥 THIS IS THE MISSING BUTTON -->
-        <a href="{% url 'add_daily_menu' menu.id %}">
-            <button>Add Weekly Food</button>
-        </a>
-
-        <a href="{% url 'add_subscription' menu.id %}">
-            <button>Add Subscription Plan</button>
-        </a>
-
-    </div>
-        {% empty %}
-            <p>No menus added yet.</p>
-        {% endfor %}
+        <div class="card">
+            <h3 class="card-title mb-3">Your Menus</h3>
+            {% if owner_menus %}
+                <div class="menu-grid">
+                    {% for menu in owner_menus %}
+                        <div class="menu-card">
+                            {% if menu.image %}
+                                <img src="{{ menu.image.url }}" alt="{{ menu.title }}" class="menu-card-image">
+                            {% else %}
+                                <div class="menu-card-image"></div>
+                            {% endif %}
+                            <div class="menu-card-body">
+                                <h4 class="menu-card-title">{{ menu.title }}</h4>
+                                <p class="menu-card-description">{{ menu.description|truncatewords:15 }}</p>
+                                <div class="menu-card-actions">
+                                    <a href="{% url 'edit_menu' menu.id %}" class="btn btn-secondary">Edit</a>
+                                    <a href="{% url 'delete_menu' menu.id %}" class="btn btn-danger" onclick="return confirm('Are you sure?');">Delete</a>
+                                    <a href="{% url 'add_daily_menu' menu.id %}" class="btn">Weekly Food</a>
+                                    <a href="{% url 'add_subscription' menu.id %}" class="btn btn-success">Subscription</a>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="empty-state">
+                    <div class="empty-state-icon">📋</div>
+                    <h3>No menus added yet</h3>
+                    <p>Start by adding your first menu!</p>
+                    <a href="{% url 'add_menu' %}" class="btn mt-3">Add New Menu</a>
+                </div>
+            {% endif %}
+        </div>
 
     {% else %}
 
         <!-- CUSTOMER DASHBOARD SECTION -->
-        <h3>Customer Dashboard</h3>
-
-        <a href="{% url 'menu' %}">
-            <button>Browse Menus</button>
-        </a>
-
-        <hr>
-
-        <h4>Your Active Subscriptions</h4>
-
-        {% for sub in active_subscriptions %}
-            <div style="border:1px solid #ccc; padding:10px; margin-bottom:10px;">
-                <strong>{{ sub.menu.title }}</strong><br>
-                Ends on: {{ sub.end_date }}
+        <div class="card mb-3">
+            <div class="card-header">
+                <h3 class="card-title">Customer Dashboard</h3>
+                <a href="{% url 'menu' %}" class="btn">Browse Menus →</a>
             </div>
-        {% empty %}
-            <p>No active subscriptions.</p>
-        {% endfor %}
+        </div>
+
+        {% if active_subscriptions %}
+        <div class="card mb-3">
+            <h3 class="card-title mb-3">Your Active Subscriptions</h3>
+            {% for sub in active_subscriptions %}
+                <div class="subscription-card">
+                    <div class="flex-between">
+                        <div>
+                            <strong>{{ sub.menu.title }}</strong>
+                            <p style="color: #666; margin-top: 0.5rem;">Ends on: {{ sub.end_date }}</p>
+                        </div>
+                        <a href="{% url 'menu' %}" class="btn">View Details</a>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="card mb-3">
+            <div class="empty-state">
+                <div class="empty-state-icon">📦</div>
+                <h3>No active subscriptions</h3>
+                <p>Browse our menus and start your subscription today!</p>
+                <a href="{% url 'menu' %}" class="btn mt-3">Browse Menus</a>
+            </div>
+        </div>
+        {% endif %}
 
     {% endif %}
 
 {% else %}
 
-    <p>Please login or register to continue.</p>
+    <div class="card">
+        <div class="text-center" style="padding: 3rem 1rem;">
+            <h2 style="font-size: 2.5rem; margin-bottom: 1rem;">🍱 Welcome to Apna Dabba</h2>
+            <p style="font-size: 1.2rem; color: #666; margin-bottom: 2rem;">
+                Discover delicious homemade meals delivered to your doorstep
+            </p>
+            <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+                <a href="{% url 'login' %}" class="btn" style="font-size: 1.1rem; padding: 1rem 2rem;">Login</a>
+                <a href="{% url 'register' %}" class="btn btn-outline" style="font-size: 1.1rem; padding: 1rem 2rem;">Register</a>
+            </div>
+        </div>
+    </div>
 
 {% endif %}
 

@@ -13,6 +13,7 @@ urlpatterns = [
     path('customer-dashboard/', views.customer_dashboard, name='customer_dashboard'),
     path('subscribe/<int:subscription_id>/', views.subscribe, name='subscribe'),
     path('payment/<int:subscription_id>/', views.payment_page, name='payment_page'),
+    path('toggle-meal/<int:subscription_id>/', views.toggle_meal_status, name='toggle_meal'),
 
 
 

@@ -2,89 +2,99 @@
 
 {% block content %}
 
+<div class="dashboard-header">
+    <h2>🍽️ Available Menus</h2>
+    <p>Browse our delicious meal options</p>
+</div>
+
 {% if is_customer %}
-<form method="GET" style="margin-bottom:20px;">
-    <input type="text" name="q" placeholder="Search by menu title..."
-           value="{{ query|default:'' }}">
-    <button type="submit">Search</button>
-</form>
+<div class="card mb-3">
+    <form method="GET" class="search-bar">
+        <input type="text" name="q" placeholder="Search by menu title..."
+               value="{{ query|default:'' }}">
+        <button type="submit">Search</button>
+    </form>
+</div>
 {% endif %}
 
-<h2>Available Menus</h2>
-
-{% for menu in menus %}
-<div class="menu-card" style="border:1px solid #ccc; padding:15px; margin-bottom:20px;">
-
-    {% if is_owner %}
-        <a href="{% url 'add_daily_menu' menu.id %}">
-            <button>Add Weekly Food</button>
-        </a>
-    {% endif %}
-
-    {% if menu.image %}
-        <img src="{{ menu.image.url }}" width="200">
-    {% endif %}
-
-    <h3>{{ menu.title }}</h3>
-    <p>{{ menu.description }}</p>
-    <p><strong>₹{{ menu.monthly_price }}/month</strong></p>
-
-    <!-- OWNER CONTROLS -->
-    {% if user.is_authenticated and user.is_staff and menu.tiffin_service.owner == user %}
-        <a href="{% url 'edit_menu' menu.id %}"><button>Edit</button></a>
-        <a href="{% url 'delete_menu' menu.id %}"
-           onclick="return confirm('Are you sure?');">
-           <button>Delete</button>
-        </a>
-        <a href="{% url 'add_subscription' menu.id %}">
-            <button>Add Subscription</button>
-        </a>
-    {% endif %}
-
-    <!-- WEEKLY MENU -->
-    <hr>
-    <h4>Weekly Menu</h4>
-
-    {% for day_menu in menu.daily_menus.all %}
-        <div style="margin-bottom:10px;">
-            <strong>{{ day_menu.day }}</strong>
-            <p>{{ day_menu.food_description }}</p>
-
-            {% if day_menu.image %}
-                <img src="{{ day_menu.image.url }}" width="150">
-            {% endif %}
-        </div>
-    {% empty %}
-        <p>No weekly food added.</p>
-    {% endfor %}
-
-    <!-- SUBSCRIPTIONS -->
-    <hr>
-    <h4>Subscriptions</h4>
-
-    {% for sub in menu.subscriptions.all %}
-        <div style="border:1px solid #eee; padding:10px; margin-bottom:10px;">
-            <p><strong>{{ sub.title }}</strong></p>
-            <p>{{ sub.duration_in_days }} days</p>
-            <p>₹{{ sub.price }}</p>
-
-            {% if user.is_authenticated and not user.is_staff %}
-                {% if not sub.is_subscribed %}
-                    <a href="{% url 'subscribe' sub.id %}">
-                        <button>Subscribe</button>
-                    </a>
+{% if menus %}
+    <div class="menu-grid">
+        {% for menu in menus %}
+            <div class="menu-card">
+                {% if menu.image %}
+                    <img src="{{ menu.image.url }}" alt="{{ menu.title }}" class="menu-card-image">
                 {% else %}
-                    <button disabled>Subscribed</button>
+                    <div class="menu-card-image"></div>
                 {% endif %}
-            {% endif %}
-        </div>
-    {% empty %}
-        <p>No subscriptions available.</p>
-    {% endfor %}
+                
+                <div class="menu-card-body">
+                    <h3 class="menu-card-title">{{ menu.title }}</h3>
+                    <p class="menu-card-description">{{ menu.description }}</p>
+                    <p class="menu-card-price">₹{{ menu.monthly_price }}/month</p>
 
-</div>
-{% empty %}
-    <p>No menus available.</p>
-{% endfor %}
+                    <!-- OWNER CONTROLS -->
+                    {% if user.is_authenticated and user.is_staff and menu.tiffin_service.owner == user %}
+                        <div class="menu-card-actions">
+                            <a href="{% url 'edit_menu' menu.id %}" class="btn btn-secondary">Edit</a>
+                            <a href="{% url 'delete_menu' menu.id %}" class="btn btn-danger" onclick="return confirm('Are you sure?');">Delete</a>
+                            <a href="{% url 'add_daily_menu' menu.id %}" class="btn">Weekly Food</a>
+                            <a href="{% url 'add_subscription' menu.id %}" class="btn btn-success">Subscription</a>
+                        </div>
+                    {% endif %}
+
+                    <!-- WEEKLY MENU -->
+                    {% if menu.daily_menus.all %}
+                        <div style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 2px solid #f0f0f0;">
+                            <h4 style="font-size: 1.1rem; margin-bottom: 1rem; color: var(--text-primary);">📅 Weekly Menu</h4>
+                            {% for day_menu in menu.daily_menus.all %}
+                                <div class="subscription-card" style="margin-bottom: 0.75rem;">
+                                    <strong>{{ day_menu.day }}</strong>
+                                    <p style="margin-top: 0.5rem; color: var(--text-secondary);">{{ day_menu.food_description }}</p>
+                                    {% if day_menu.image %}
+                                        <img src="{{ day_menu.image.url }}" style="width: 100%; max-width: 200px; border-radius: 8px; margin-top: 0.5rem;">
+                                    {% endif %}
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+
+                    <!-- SUBSCRIPTIONS -->
+                    {% if menu.subscriptions.all %}
+                        <div style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 2px solid #f0f0f0;">
+                            <h4 style="font-size: 1.1rem; margin-bottom: 1rem; color: var(--text-primary);">💳 Subscription Plans</h4>
+                            {% for sub in menu.subscriptions.all %}
+                                <div class="subscription-card">
+                                    <div class="flex-between">
+                                        <div>
+                                            <strong>{{ sub.title }}</strong>
+                                            <p style="color: var(--text-secondary); margin-top: 0.25rem;">
+                                                {{ sub.duration_in_days }} days • ₹{{ sub.price }}
+                                            </p>
+                                        </div>
+                                        {% if user.is_authenticated and not user.is_staff %}
+                                            {% if not sub.is_subscribed %}
+                                                <a href="{% url 'subscribe' sub.id %}" class="btn">Subscribe</a>
+                                            {% else %}
+                                                <button disabled class="btn btn-success">Subscribed</button>
+                                            {% endif %}
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="card">
+        <div class="empty-state">
+            <div class="empty-state-icon">🍽️</div>
+            <h3>No menus available</h3>
+            <p>Check back later for new menu options!</p>
+        </div>
+    </div>
+{% endif %}
 
 {% endblock %}
